@@ -1,0 +1,15 @@
+{
+  "name": "directory",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "build": "node build.js",
+    "format": "prettier --write ."
+  },
+  "prettier": {
+    "endOfLine": "crlf"
+  },
+  "devDependencies": {
+    "prettier": "3.9.10"
+  }
+}

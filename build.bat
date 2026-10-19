@@ -11,3 +11,5 @@ gh api --paginate --slurp "%user_endpoint%/repos?per_page=100" > "%data%\repos.j
 gh api --paginate --slurp "%user_endpoint%/gists?per_page=100" > "%data%\gists.json" || exit /b 1
 
 node "%~dp0build.js" || exit /b 1
+
+pause

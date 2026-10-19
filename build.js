@@ -1,6 +1,26 @@
 import fs from "fs/promises";
 
-const li = `<li><a href="{{html_url}}">{{name}}</a></li>`;
+const htmlEntities = {
+  "&": "&amp;",
+  "<": "&lt;",
+  ">": "&gt;",
+  '"': "&quot;",
+  "'": "&#39;",
+};
+
+const escapeHtml = (text) =>
+  text.replace(/[&<>"']/g, (character) => htmlEntities[character]);
+
+const toLastUpdated = (timestamp) =>
+  `<br /><small>Last updated <time datetime="${timestamp}">` +
+  new Date(timestamp).toLocaleDateString("en-GB", { dateStyle: "long" }) +
+  "</time></small>";
+
+const toListItem = (url, name, description, updatedAt) =>
+  `<li><a href="${escapeHtml(url)}"><strong>${escapeHtml(name)}</strong></a>` +
+  (updatedAt ? toLastUpdated(updatedAt) : "") +
+  (description ? `<br />${escapeHtml(description)}` : "") +
+  "</li>";
 
 const read = async (path, isJson = true) => {
   const file = await fs.readFile(new URL(path, import.meta.url), "utf-8");
@@ -8,8 +28,10 @@ const read = async (path, isJson = true) => {
   return file;
 };
 
-const byNewest = (a, b) =>
-  (b.pushed_at ?? b.updated_at).localeCompare(a.pushed_at ?? a.updated_at);
+// Repos have pushed_at (last code push), gists only have updated_at.
+const lastUpdated = (item) => item.pushed_at ?? item.updated_at;
+
+const byNewest = (a, b) => lastUpdated(b).localeCompare(lastUpdated(a));
 
 const outputDirectory = new URL("./docs/", import.meta.url);
 
@@ -20,35 +42,50 @@ const outputDirectory = new URL("./docs/", import.meta.url);
     read("./index.html", false),
   ]);
 
-  const repos = repoPages
+  const publicRepos = repoPages
     .flat()
     .filter((repo) => !repo.private)
-    .sort(byNewest)
-    .map((repo) =>
-      li
-        .replace("{{html_url}}", () => repo.html_url)
-        .replace("{{name}}", () => repo.name),
-    )
-    .join("");
+    .sort(byNewest);
+
+  const toRepoList = (isFork) =>
+    publicRepos
+      .filter((repo) => repo.fork === isFork)
+      .map((repo) =>
+        toListItem(
+          repo.html_url,
+          repo.name,
+          repo.description,
+          lastUpdated(repo),
+        ),
+      )
+      .join("");
+
+  const repos = toRepoList(false);
+  const forks = toRepoList(true);
 
   const gists = gistPages
     .flat()
     .filter((gist) => gist.public)
     .sort(byNewest)
-    .map((gist) =>
-      li
-        .replace("{{html_url}}", () => gist.html_url)
-        .replace(
-          "{{name}}",
-          () =>
-            (gist.description || Object.keys(gist.files)[0]).split(" - ")[0],
-        ),
-    )
+    .map((gist) => {
+      // Gist descriptions are written as "Name - what it does".
+      const [name, ...description] = (
+        gist.description || Object.keys(gist.files)[0]
+      ).split(" - ");
+
+      return toListItem(
+        gist.html_url,
+        name,
+        description.join(" - "),
+        lastUpdated(gist),
+      );
+    })
     .join("");
 
   const output = html
     .replace("{{repos}}", () => repos)
-    .replace("{{gists}}", () => gists);
+    .replace("{{gists}}", () => gists)
+    .replace("{{forks}}", () => forks);
 
   await fs.mkdir(outputDirectory, { recursive: true });
   await Promise.all([

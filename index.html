@@ -3,7 +3,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>Jia Liang's projects</title>
+    <title>Jia Liang's Projects</title>
     <meta
       name="description"
       content="Every public GitHub repository and gist by Jia Liang."
@@ -28,11 +28,19 @@
       a {
         color: #58a6ff;
       }
+
+      li {
+        margin-bottom: 1rem;
+      }
+
+      li small {
+        color: #8b949e;
+      }
     </style>
   </head>
   <body>
     <main>
-      <h1>Jia Liang's projects</h1>
+      <h1>Jia Liang's Projects</h1>
       <p>
         Every public GitHub repository and gist by Jia Liang. More on
         <a href="https://github.com/jialiang">GitHub</a>.
@@ -46,6 +54,11 @@
       <h2>Gists</h2>
       <ul>
         {{gists}}
+      </ul>
+
+      <h2>Forks</h2>
+      <ul>
+        {{forks}}
       </ul>
     </main>
   </body>
