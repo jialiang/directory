@@ -1,5 +1,7 @@
 import fs from "fs/promises";
 
+import fonts from "./fonts/index.js";
+
 const htmlEntities = {
   "&": "&amp;",
   "<": "&lt;",
@@ -92,6 +94,7 @@ const outputDirectory = new URL("./docs/", import.meta.url);
     // Without this marker, Pages runs the folder through Jekyll first.
     fs.writeFile(new URL(".nojekyll", outputDirectory), ""),
     fs.writeFile(new URL("index.html", outputDirectory), output),
+    fonts.subsetFonts(output, outputDirectory),
   ]);
 
   console.log("Done.");
