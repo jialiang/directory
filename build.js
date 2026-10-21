@@ -35,7 +35,7 @@ const lastUpdated = (item) => item.pushed_at ?? item.updated_at;
 
 const byNewest = (a, b) => lastUpdated(b).localeCompare(lastUpdated(a));
 
-const outputDirectory = new URL("./docs/", import.meta.url);
+const outputDirectory = new URL("./dist/", import.meta.url);
 
 (async function () {
   const [repoPages, gistPages, html] = await Promise.all([
