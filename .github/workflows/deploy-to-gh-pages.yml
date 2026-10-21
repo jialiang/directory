@@ -40,7 +40,11 @@ jobs:
         run: |
           mkdir -p data
           gh api --paginate --slurp "users/jialiang/repos?per_page=100" > data/repos.json
-          gh api --paginate --slurp "users/jialiang/gists?per_page=100" > data/gists.json
+
+          # The Actions token can't read gists, but public ones need no token.
+          # Wrapping the page in [] matches the --slurp shape above.
+          gists=$(curl -fsS "https://api.github.com/users/jialiang/gists?per_page=100")
+          printf '[%s]' "$gists" > data/gists.json
 
       - name: Build webpage
         run: node build.js
