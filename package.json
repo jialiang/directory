@@ -10,6 +10,7 @@
     "endOfLine": "crlf"
   },
   "devDependencies": {
+    "font-subsetter": "github:jialiang/font-subsetter",
     "prettier": "3.9.10"
   }
 }

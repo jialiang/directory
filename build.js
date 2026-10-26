@@ -1,6 +1,7 @@
 import fs from "fs/promises";
+import { fileURLToPath } from "url";
 
-import fonts from "./fonts/index.js";
+import { subsetFonts } from "font-subsetter";
 
 const htmlEntities = {
   "&": "&amp;",
@@ -94,7 +95,13 @@ const outputDirectory = new URL("./dist/", import.meta.url);
     // Without this marker, Pages runs the folder through Jekyll first.
     fs.writeFile(new URL(".nojekyll", outputDirectory), ""),
     fs.writeFile(new URL("index.html", outputDirectory), output),
-    fonts.subsetFonts(output, outputDirectory),
+    subsetFonts({
+      html: output,
+      stylesheets: [output.match(/<style>([\s\S]*?)<\/style>/)[1]],
+      families: { "Noto Sans JP": "noto-sans-jp" },
+      sourceDirectory: fileURLToPath(new URL("./fonts/", import.meta.url)),
+      outputDirectory: fileURLToPath(new URL("fonts/", outputDirectory)),
+    }),
   ]);
 
   console.log("Done.");
